@@ -1,6 +1,7 @@
 package handlersUser
 
 import (
+    "backend/service/errors"
     "net/http"
     "encoding/json"
     "backend/service"
@@ -14,7 +15,6 @@ type LoginRequest struct {
 
 type LoginResponse struct {
     User  *domain.User `json:"user"`
-    Token string      `json:"token"`
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -24,13 +24,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    user, token, err := service.Authenticate(req.Username, req.Password)
+    // Вызов сервиса для проверки логина и пароля
+    user, err := service.Authenticate(req.Username, req.Password)
     if err != nil {
-        http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+        if err == errors.ErrInvalidCredentials {
+            http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+        } else {
+            http.Error(w, "Internal server error", http.StatusInternalServerError)
+        }
         return
     }
-
-    response := LoginResponse{User: user, Token: token}
+        response := LoginResponse{User: user}
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(response)
+
 }

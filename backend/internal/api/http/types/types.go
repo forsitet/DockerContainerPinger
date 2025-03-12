@@ -39,7 +39,3 @@ func CreateResponse(w http.ResponseWriter, resp any) {
     return
   }
 }
-
-func SessionResponse(w http.ResponseWriter, s domain.Session){
-  w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", s))
-}
