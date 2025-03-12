@@ -6,16 +6,8 @@ import (
     "encoding/json"
     "backend/service"
     "backend/domain"
+    "backend/internal/api\http/types"
 )
-
-type LoginRequest struct {
-    Username string `json:"username"`
-    Password string `json:"password"`
-}
-
-type LoginResponse struct {
-    User  *domain.User `json:"user"`
-}
 
 func Login(w http.ResponseWriter, r *http.Request) {
     var req LoginRequest
@@ -24,7 +16,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Вызов сервиса для проверки логина и пароля
     user, err := service.Authenticate(req.Username, req.Password)
     if err != nil {
         if err == errors.ErrInvalidCredentials {

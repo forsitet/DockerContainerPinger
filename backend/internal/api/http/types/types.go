@@ -1,41 +1,36 @@
 package types
 
 import (
-  "encoding/json"
-  "errors"
-  "fmt"
-  "net/http"
-  "post/domain"
-
-  "github.com/go-chi/chi/v5"
+    "encoding/json"
+    "net/http"
+    "backend/domain" 
 )
 
-type GetHandelerRequest struct {
-  Key string
+
+type LoginRequest struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
 }
 
-func CreateGetHandelerRequest(r *http.Request) (*GetHandelerRequest, error) {
-  key := chi.URLParam(r, "task_id")
-  if key == "" {
-    return nil, errors.New("missing key in params")
-  }
-  return &GetHandelerRequest{Key: key}, nil
+type LoginResponse struct {
+    User *domain.User `json:"user"`
 }
 
-type GetHandelerResponse struct {
-  Value string `json:"value"`
+type ErrorResponse struct {
+    Code    int    `json:"code"`
+    Message string `json:"message"`
 }
 
 func CreateResponse(w http.ResponseWriter, resp any) {
-  w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "application/json")
 
-  if err, ok := (resp).(ErrorResponse); ok {
-    w.WriteHeader(err.Code)
-  }
+    if err, ok := resp.(ErrorResponse); ok {
+        w.WriteHeader(err.Code)
+    }
 
-  if err := json.NewEncoder(w).Encode(&resp); err != nil {
-    w.WriteHeader(http.StatusInternalServerError)
-    http.Error(w, "Internal error", http.StatusInternalServerError)
-    return
-  }
+    if err := json.NewEncoder(w).Encode(resp); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        http.Error(w, "Internal server error", http.StatusInternalServerError)
+        return
+    }
 }
