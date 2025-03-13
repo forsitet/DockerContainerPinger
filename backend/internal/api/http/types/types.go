@@ -21,16 +21,15 @@ type ErrorResponse struct {
     Message string `json:"message"`
 }
 
-func CreateResponse(w http.ResponseWriter, resp any) {
+func CreateResponse(w http.ResponseWriter, statusCode int, resp any) {
     w.Header().Set("Content-Type", "application/json")
-
-    if err, ok := resp.(ErrorResponse); ok {
-        w.WriteHeader(err.Code)
-    }
+    w.WriteHeader(statusCode)
 
     if err := json.NewEncoder(w).Encode(resp); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
-        http.Error(w, "Internal server error", http.StatusInternalServerError)
-        return
+        json.NewEncoder(w).Encode(ErrorResponse{
+            Code:    http.StatusInternalServerError,
+            Message: "Internal server error",
+        })
     }
 }
