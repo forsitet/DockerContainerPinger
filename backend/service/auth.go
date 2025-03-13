@@ -2,15 +2,9 @@ package service
 
 import (
 	"backend/domain"
-	"backend/errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-type UserRepository interface {
-	GetUserByUsername(username string) (*domain.User, error)
-	AddUser(user *domain.User) error
-}
 
 type AuthService struct {
 	userRepo UserRepository
@@ -36,11 +30,11 @@ func CheckPasswordHash(password, hash string) bool {
 func (s *AuthService) Authenticate(username, password string) (*domain.User, error) {
 	user, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return nil, errors.ErrInvalidCredentials
+		return nil, ErrInvalidCredentials
 	}
 
 	if !CheckPasswordHash(password, user.Password) {
-		return nil, errors.ErrInvalidCredentials
+		return nil, ErrInvalidCredentials
 	}
 
 	return user, nil

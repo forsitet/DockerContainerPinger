@@ -1,9 +1,6 @@
 package main
 
 import (
-	handlersUser "backend/internal/api/http"
-	"backend/internal/repository"
-	"backend/service"
 	"flag"
 	"log"
 	"net/http"
@@ -12,16 +9,6 @@ import (
 )
 
 func main() {
-	db := repository.NewInMemoryDB()
-	userRepo := repository.NewUserRepository(db)
-
-	hashedPassword, err := service.HashPassword("test")
-	if err != nil {
-		log.Fatalf("Failed to hash password: %v", err)
-	}
-
-	authService := service.NewAuthService(userRepo)
-	handler := handlersUser.NewHandler(authService)
 
 	addr := flag.String("addr", ":8080", "address for http server")
 	flag.Parse()
