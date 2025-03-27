@@ -1,0 +1,54 @@
+basePath: /
+definitions:
+  domain.User:
+    properties:
+      id:
+        type: string
+      isadmin:
+        type: boolean
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Task API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет пользователя в базе данных
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: key not found
+          schema:
+            type: string
+      summary: Аутентификация пользователя
+      tags:
+      - user
+swagger: "2.0"

@@ -1,7 +1,7 @@
 package types
 
 import (
-	"backend/domain"
+	"back/domain"
 	"encoding/json"
 	"net/http"
 )
