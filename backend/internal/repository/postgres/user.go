@@ -30,7 +30,7 @@ func (u *UserRepo) Get(key string) (any, error) {
 		}
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (u *UserRepo) Post(key string, value any) error {

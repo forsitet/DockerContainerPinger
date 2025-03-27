@@ -1,16 +1,17 @@
 package service
 
 import (
-	"backend/domain"
+	"back/domain"
+	"back/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	userRepo UserRepository
+	userRepo repository.Object
 }
 
-func NewAuthService(userRepo UserRepository) *AuthService {
+func NewAuthService(userRepo repository.Object) *AuthService {
 	return &AuthService{userRepo: userRepo}
 }
 
@@ -22,20 +23,25 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func CheckPasswordHash(password, hash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
+
 func (s *AuthService) Authenticate(username, password string) (*domain.User, error) {
-	user, err := s.userRepo.GetUserByUsername(username)
+	rawUser, err := s.userRepo.Get(username)
 	if err != nil {
 		return nil, ErrInvalidCredentials
 	}
 
-	if !CheckPasswordHash(password, user.Password) {
+	user, ok := rawUser.(domain.User)
+	if !ok {
 		return nil, ErrInvalidCredentials
 	}
 
-	return user, nil
+	return &user, nil
 }
