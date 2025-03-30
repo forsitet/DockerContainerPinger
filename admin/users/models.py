@@ -27,20 +27,6 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.username
 
-    @property
-    def is_staff(self):
-        return self.is_admin
-
-    @property
-    def is_superuser(self):
-        return self.is_admin
-    
-    def has_perm(self, perm, obj=None):
-        return self.is_admin
-
-    def has_module_perms(self, app_label):
-        return self.is_admin
-
     def save(self, *args, **kwargs):
         if not self.password.startswith("pbkdf2_"):
             self.set_password(self.password)
