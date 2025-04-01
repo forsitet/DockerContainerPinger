@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1qvh$mvuj^ovmphkflzel84m_$=-t@3)fhfhlil=1ilpu8_m4g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -84,8 +84,8 @@ DATABASES = {
         'NAME': 'pinger_auth',
         'USER': 'postgres',
         'PASSWORD': '12345',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'HOST': 'bd_auth',
+        'PORT': '5433',
     }
 }
 
