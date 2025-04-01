@@ -1,0 +1,14 @@
+{
+    "Servers": {
+      "1": {
+        "Name": "pinger_auth",
+        "Group": "Servers",
+        "Host": "bd_auth",
+        "Port": 5433,
+        "MaintenanceDB": "postgres",
+        "Username": "postgres",
+        "Password": "12345",
+        "SSLMode": "prefer"
+      }
+    }
+  }

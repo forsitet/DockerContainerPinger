@@ -5,12 +5,14 @@ go 1.24.0
 require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/swaggo/swag v1.16.4
-	golang.org/x/crypto v0.28.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.10
 )
 
-require github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
+require (
+	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
+	golang.org/x/crypto v0.28.0 // indirect
+)
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
