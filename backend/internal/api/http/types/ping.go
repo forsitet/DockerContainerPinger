@@ -24,7 +24,7 @@ func CreateGetHandlerReq(r *http.Request, rawKey string) (*GetHandlerReq, error)
 
 func CreateResponse(w http.ResponseWriter, resp any) {
 	w.Header().Set("Content-Type", "application/json")
-	if err, ok := resp.(errorResponse); ok {
+	if err, ok := resp.(ErrorResponse); ok {
 		w.WriteHeader(err.Code)
 	}
 

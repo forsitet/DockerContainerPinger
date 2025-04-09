@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	// _ "back/docs"
 	"back/cmd/app/config"
+	_ "back/docs"
 	handler "back/internal/api/http"
 	"back/internal/repository/kafka"
 	"back/internal/repository/postgres"
@@ -50,7 +50,7 @@ func main() {
 
 	pingRepo := postgres.NewPingRepository(pingDB)
 	pingService := service.NewServicePing(pingRepo)
-	pingHandler := handler.NewHandlerPing(pingService)
+	pingHandlers := handler.NewHandlerPing(pingService)
 
 	go kafka.NewKafkaConsumer(cfg.Kafka.Broker, "backend-group", []string{"ping"}, &kafka.Consumer{
 		Repo: pingRepo,
@@ -58,9 +58,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
-	r.Get("/api/pings", pingHandler.GetPing)
-	r.Post("/api/ping", pingHandler.PostPing)
-	r.Delete("/api/pings/old", pingHandler.DeleteOldPing)
+	pingHandlers.WithObjectHandlers(r)
 
 	log.Printf("Starting server on %s", cfg.HTTP.Address)
 	if err := http.ListenAndServe(cfg.HTTP.Address, r); err != nil {

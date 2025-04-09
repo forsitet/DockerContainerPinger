@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type PingHandler struct {
@@ -20,6 +22,15 @@ func NewHandlerPing(ping usecases.Ping) *PingHandler {
 	return &PingHandler{ping}
 }
 
+// @Summary      Get a list of containers
+// @Description  Returns a certain number of containers from the database (100 by default)
+// @Tags         Ping
+// @Produce      json
+// @Param		 limit query int false "количество контейнеров"
+// @Success      200  {array}  []domain.Ping
+// @Failure      400  {object}  types.ErrorResponse
+// @Failure      500  {object}  types.ErrorResponse
+// @Router       /api/pings [get]
 func (h *PingHandler) GetPing(w http.ResponseWriter, r *http.Request) {
 	const op = "internal.api.http.GetPing"
 	limit := 100
@@ -58,6 +69,15 @@ func (h *PingHandler) limitHandler(w http.ResponseWriter, limit int) {
 	}
 }
 
+// @Summary      Saves and updates data in the database about containers
+// @Description  Retrieves data from Kafka from the 'ping' topic
+// @Tags         Ping
+// @Accept       json
+// @Param        ping  body  domain.Ping  true "JSON ping"
+// @Success      201  {object}  domain.Ping
+// @Failure      400  {object}  types.ErrorResponse
+// @Failure      500  {object}  types.ErrorResponse
+// @Router       /api/ping [post]
 func (h *PingHandler) PostPing(w http.ResponseWriter, r *http.Request) {
 	const op = "internal.api.http.PostPing"
 	var ping *domain.Ping
@@ -77,6 +97,14 @@ func (h *PingHandler) PostPing(w http.ResponseWriter, r *http.Request) {
 	types.CreateResponse(w, http.StatusCreated)
 }
 
+// @Summary      Delete containers from the database after the 'before' date
+// @Description  Deletes outdated containers
+// @Tags         Ping
+// @Param        before  path  time.Time  true  "'before' must be in the format RFC3339"
+// @Success      204  "Удалено"
+// @Failure      400  {object}  types.ErrorResponse
+// @Failure      500  {object}  types.ErrorResponse
+// @Router       /api/pings/old [delete]
 func (h *PingHandler) DeleteOldPing(w http.ResponseWriter, r *http.Request) {
 	const op = "internal.api.http.DeleteOldPing"
 	req, err := types.CreateGetHandlerReq(r, "before")
@@ -100,4 +128,14 @@ func (h *PingHandler) DeleteOldPing(w http.ResponseWriter, r *http.Request) {
 			types.NewErrorResponse(err, http.StatusInternalServerError))
 	}
 
+	types.CreateResponse(w, http.StatusNoContent)
+
+}
+
+func (h *PingHandler) WithObjectHandlers(r chi.Router) {
+	r.Route("/api", func(r chi.Router) {
+		r.Get("/pings", h.GetPing)
+		r.Post("/ping", h.PostPing)
+		r.Delete("/pings/old", h.DeleteOldPing)
+	})
 }
