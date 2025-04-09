@@ -19,10 +19,12 @@ type ConsumerGroupHandler struct {
 }
 
 func (h *ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
+	log.Println("kafka is running")
 	return nil
 }
 
 func (h *ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
+	log.Println("kafka stops")
 	return nil
 }
 
