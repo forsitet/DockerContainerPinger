@@ -1,47 +1,93 @@
 package postgres
 
 import (
-	"gorm.io/gorm"
 	"back/domain"
+	"database/sql"
+	"log"
+	"time"
 )
 
+type preparedStatements struct {
+	insertPing           *sql.Stmt //Post
+	getPingResults       *sql.Stmt //Get
+	deleteOldPingResults *sql.Stmt // Delete
+}
+
 type PingRepository struct {
-	DB *gorm.DB
+	DB    *sql.DB
+	stmts *preparedStatements
 }
 
-func NewPingRepository(db *gorm.DB) (*PingRepository, error) {
-	if err := db.AutoMigrate(&domain.Ping{}); err != nil {
+func NewPingRepository(db *sql.DB) *PingRepository {
+	InitPingTables(db)
+	stmts := newPreparedStatements(db)
+	return &PingRepository{
+		DB:    db,
+		stmts: stmts,
+	}
+}
+
+func newPreparedStatements(db *sql.DB) *preparedStatements {
+	const op = "repository.postgres.NewPreparedStatements"
+	stmts := &preparedStatements{}
+	var err error
+
+	stmts.getPingResults, err = db.Prepare(`
+		SELECT ip_address, container_name, ping_time, last_success
+		FROM pings
+		ORDER BY id DESC LIMIT $1
+	`)
+	if err != nil {
+		log.Println(op, "getPingResults: ", err)
+	}
+
+	stmts.insertPing, err = db.Prepare(`
+		INSERT INTO pings (ip_address, container_name, ping_time, last_success)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (ip_address) DO UPDATE
+		SET container_name = EXCLUDED.container_name,
+			ping_time = EXCLUDED.ping_time,
+			last_success = EXCLUDED.last_success
+	`)
+	if err != nil {
+		log.Println(op, "insertPing: ", err)
+	}
+
+	stmts.deleteOldPingResults, err = db.Prepare("DELETE FROM pings WHERE last_success < $1")
+	if err != nil {
+		log.Println(op, "deleteOldPingResults: ", err)
+	}
+
+	return stmts
+}
+
+func (r *PingRepository) Get(limit int) ([]domain.Ping, error) {
+	const op = "repository.postgres.Get"
+	rows, err := r.stmts.getPingResults.Query(limit)
+	if err != nil {
 		return nil, err
 	}
-	return &PingRepository{DB: db}, nil
-}
-
-func (r *PingRepository) Get(key string) (any, error) {
-	var ping domain.Ping
-	if err := r.DB.Where("ip_address = ?", key).First(&ping).Error; err != nil {
-		return nil, err
+	defer rows.Close()
+	pings := make([]domain.Ping, 0)
+	for rows.Next() {
+		var p domain.Ping
+		err := rows.Scan(&p.IPAddress, &p.ContainerName, &p.PingTime, &p.LastSuccess)
+		if err != nil {
+			log.Println(op, err)
+			continue
+		}
+		pings = append(pings, p)
 	}
-	return ping, nil
+	return pings, nil
 }
 
-func (r *PingRepository) Post(key string, value any) error {
-	ping, ok := value.(domain.Ping)
-	if !ok {
-		return gorm.ErrInvalidData
-	}
-	ping.IPAddress = key
-	return r.DB.Create(&ping).Error
+func (r *PingRepository) Post(pr domain.Ping) error {
+	_, err := r.stmts.insertPing.Exec(pr.IPAddress, pr.ContainerName, pr.PingTime, pr.LastSuccess)
+	return err
+
 }
 
-func (r *PingRepository) Put(key string, value any) error {
-	ping, ok := value.(domain.Ping)
-	if !ok {
-		return gorm.ErrInvalidData
-	}
-	ping.IPAddress = key
-	return r.DB.Where("ip_address = ?", key).Save(&ping).Error
-}
-
-func (r *PingRepository) Delete(key string) error {
-	return r.DB.Where("ip_address = ?", key).Delete(&domain.Ping{}).Error
+func (r *PingRepository) Delete(before time.Time) error {
+	_, err := r.stmts.deleteOldPingResults.Exec(before)
+	return err
 }
