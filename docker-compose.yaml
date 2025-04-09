@@ -82,7 +82,7 @@ services:
     image: provectuslabs/kafka-ui
     container_name: kafka-ui
     ports:
-      - "8090:8080"
+      - "8090:8090"
     restart: always
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
@@ -102,6 +102,22 @@ services:
       - ./config/pgadmin/servers.json:/pgadmin4/servers.json
     env_file:
       - .env
+  
+  pinger:
+    container_name: pinger
+    build: ./pinger
+    depends_on:
+      backend:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - BACKEND_URL=http://backend:8080
+      - DOCKER_HOST_ID=1
+      - PING_INTERVAL=10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   pgdata:
