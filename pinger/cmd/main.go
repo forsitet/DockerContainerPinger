@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "back/domain"
 	"context"
 	"encoding/json"
 	"log"
@@ -30,7 +29,7 @@ type ContainerInfo struct {
 	IPs  []string
 }
 
-func getContainerInfos(cli *dockerClient.Client) (map[string]ContainerInfo, error) {
+func getContainerInfo(cli *dockerClient.Client) (map[string]ContainerInfo, error) {
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
 		return nil, err
@@ -134,7 +133,7 @@ func main() {
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
 	for range ticker.C {
-		containerInfos, err := getContainerInfos(cli)
+		containerInfos, err := getContainerInfo(cli)
 		if err != nil {
 			log.Printf("Ошибка получения контейнерной информации: %v", err)
 			continue
