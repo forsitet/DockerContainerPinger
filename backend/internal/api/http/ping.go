@@ -27,6 +27,7 @@ func (h *PingHandler) GetPing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, types.MissingKey) {
 			h.limitHandler(w, limit)
+			return
 		} else {
 			log.Println(op, err)
 			types.CreateResponse(w,
@@ -39,7 +40,7 @@ func (h *PingHandler) GetPing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(op, err)
 		types.CreateResponse(w,
-			types.NewErrorResponse(errors.New("Bad request"), http.StatusBadRequest))
+			types.NewErrorResponse(errors.New("bad request"), http.StatusBadRequest))
 	}
 	h.limitHandler(w, limit)
 
@@ -82,7 +83,7 @@ func (h *PingHandler) DeleteOldPing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(op, err)
 		types.CreateResponse(w,
-			types.NewErrorResponse(errors.New("The 'before' parameter is required and must be in the format RFC3339"), http.StatusBadRequest))
+			types.NewErrorResponse(errors.New("the 'before' parameter is required and must be in the format RFC3339"), http.StatusBadRequest))
 	}
 
 	rawBefore := req.Key
@@ -90,7 +91,7 @@ func (h *PingHandler) DeleteOldPing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(op, err)
 		types.CreateResponse(w,
-			types.NewErrorResponse(errors.New("Invalid format of the 'before' parameter, expected RFC3339"), http.StatusBadRequest))
+			types.NewErrorResponse(errors.New("invalid format of the 'before' parameter, expected RFC3339"), http.StatusBadRequest))
 	}
 
 	if err := h.service.DeleteOldPingResult(before); err != nil {

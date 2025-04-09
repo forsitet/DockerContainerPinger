@@ -6,6 +6,6 @@ bd:
 http:
   address: ":8080"
 kafka:
-  broker: "localhost:9092"
+  broker: "kafka:9092"
 redis:
   port:

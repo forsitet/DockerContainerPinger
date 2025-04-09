@@ -31,7 +31,6 @@ func main() {
 	config.MustLoad(appFlags.ConfigPath, &cfg)
 	dbName := "ping"
 
-	// defaultDBConnStr := "host=localhost port=5432 user=postgres password=12345 dbname=postgres sslmode=disable"
 	defaultDBConnStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
 		cfg.BD.Host, cfg.BD.Port, cfg.BD.User, cfg.BD.Password)
 
@@ -41,7 +40,6 @@ func main() {
 	}
 	postgres.CreatePingRepository(dbName, postgresdb)
 
-	// pingDBConnStr := fmt.Sprintf("host=localhost port=5432 user=postgres password=12345 dbname=%s sslmode=disable", dbName)
 	pingDBConnStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.BD.Host, cfg.BD.Port, cfg.BD.User, cfg.BD.Password, dbName)
 	pingDB, err := sql.Open("postgres", pingDBConnStr)
@@ -54,7 +52,7 @@ func main() {
 	pingService := service.NewServicePing(pingRepo)
 	pingHandler := handler.NewHandlerPing(pingService)
 
-	go kafka.NewKafkaConsumer(cfg.Kafka.Broker, "backend-group", []string{"ping-results"}, &kafka.Consumer{
+	go kafka.NewKafkaConsumer(cfg.Kafka.Broker, "backend-group", []string{"ping"}, &kafka.Consumer{
 		Repo: pingRepo,
 	})
 
@@ -65,7 +63,7 @@ func main() {
 	r.Delete("/api/pings/old", pingHandler.DeleteOldPing)
 
 	log.Printf("Starting server on %s", cfg.HTTP.Address)
-	if err := http.ListenAndServe(*&cfg.HTTP.Address, r); err != nil {
+	if err := http.ListenAndServe(cfg.HTTP.Address, r); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 	}
 }
