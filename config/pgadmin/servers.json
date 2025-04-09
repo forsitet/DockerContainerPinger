@@ -9,6 +9,16 @@
         "Username": "postgres",
         "Password": "12345",
         "SSLMode": "prefer"
+      },
+      "2": {
+        "Name": "ping",
+        "Group": "Servers",
+        "Host": "bd_ping",
+        "Port": 5432,
+        "MaintenanceDB": "postgres",
+        "Username": "postgres",
+        "Password": "12345",
+        "SSLMode": "prefer"
       }
     }
   }

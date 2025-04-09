@@ -3,9 +3,9 @@ package domain
 import "time"
 
 type Ping struct {
-	ID            uint   `gorm:"primaryKey"`
-	IPAddress     string `gorm:"unique"`
-	ContainerName string
-	PingTime      float64
-	LastSuccess   time.Time
+	ID            uint      `json:"id,omitempty"`
+	IPAddress     string    `json:"ip_address"`
+	ContainerName string    `json:"container_name"`
+	PingTime      float64   `json:"ping_time"`
+	LastSuccess   time.Time `json:"last_success"`
 }

@@ -1,0 +1,11 @@
+bd:
+  host: "bd_ping"
+  user: "postgres"
+  password: "12345"
+  port: "5432"
+http:
+  address: ":8080"
+kafka:
+  broker: "kafka:9092"
+redis:
+  port:

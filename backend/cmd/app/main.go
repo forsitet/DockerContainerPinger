@@ -1,0 +1,67 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+
+	"back/cmd/app/config"
+	_ "back/docs"
+	handler "back/internal/api/http"
+	"back/internal/repository/kafka"
+	"back/internal/repository/postgres"
+	"back/usecases/service"
+	"log"
+	"net/http"
+
+	_ "github.com/lib/pq"
+	httpSwagger "github.com/swaggo/http-swagger"
+
+	"github.com/go-chi/chi/v5"
+)
+
+// @title My API
+// @version 1.0
+// @description This is a Docker-container service
+
+// @host localhost:8080
+// @BasePath /
+func main() {
+	appFlags := config.ParseFlags()
+	var cfg config.AppConfig
+	config.MustLoad(appFlags.ConfigPath, &cfg)
+	dbName := "ping"
+
+	defaultDBConnStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
+		cfg.BD.Host, cfg.BD.Port, cfg.BD.User, cfg.BD.Password)
+
+	postgresdb, err := sql.Open("postgres", defaultDBConnStr)
+	if err != nil {
+		log.Fatalf("connection error to %s: %s", dbName, err)
+	}
+	postgres.CreatePingRepository(dbName, postgresdb)
+
+	pingDBConnStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.BD.Host, cfg.BD.Port, cfg.BD.User, cfg.BD.Password, dbName)
+	pingDB, err := sql.Open("postgres", pingDBConnStr)
+	if err != nil {
+		log.Fatalf("connection error to %s: %s", dbName, err)
+	}
+	postgres.InitPingTables(pingDB)
+
+	pingRepo := postgres.NewPingRepository(pingDB)
+	pingService := service.NewServicePing(pingRepo)
+	pingHandlers := handler.NewHandlerPing(pingService)
+
+	go kafka.NewKafkaConsumer(cfg.Kafka.Broker, "backend-group", []string{"ping"}, &kafka.Consumer{
+		Repo: pingRepo,
+	})
+
+	r := chi.NewRouter()
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	pingHandlers.WithObjectHandlers(r)
+
+	log.Printf("Starting server on %s", cfg.HTTP.Address)
+	if err := http.ListenAndServe(cfg.HTTP.Address, r); err != nil {
+		log.Fatalf("Could not start server: %v", err)
+	}
+}

@@ -1,8 +1,12 @@
 package repository
 
+import (
+	"back/domain"
+	"time"
+)
+
 type Object interface {
-	Get(key string) (any, error)
-	Post(key string, value any) error
-	Put(key string, value any) error
-	Delete(key string) error
+	Get(limit int) ([]domain.Ping, error)
+	Post(pr domain.Ping) error 
+	Delete(before time.Time) error
 }
