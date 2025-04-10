@@ -1,9 +1,9 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24
+
 WORKDIR /app
 COPY . .
-RUN go build -o pinger ./cmd/main.go  # Путь к main.go должен быть верным
+RUN go mod tidy
+ENTRYPOINT [ "/ls" ]
+RUN go build -o pinger ./cmd/main.go
 
-FROM alpine:latest
-WORKDIR /app
-COPY --from=builder /app/pinger .
 CMD ["./pinger"]

@@ -3,9 +3,10 @@ package docker
 import (
     "context"
     "strings"
-    "github.com/docker/docker/api/types"
+    "github.com/docker/docker/api/types/filters"
+    "github.com/docker/docker/api/types/container"
     dockerClient "github.com/docker/docker/client"
-	"pinger/domain"
+    "pinger/domain"
 )
 
 type Client struct {
@@ -20,7 +21,10 @@ func New() (*Client, error) {
 
 // GetContainers возвращает информацию о контейнерах.
 func (c *Client) GetContainers(ctx context.Context) (map[string]domain.ContainerInfo, error) {
-    containers, err := c.cli.ContainerList(ctx, types.ContainerListOptions{})
+    containers, err := c.cli.ContainerList(ctx, container.ListOptions{
+        All:     true,  // Показывать все контейнеры
+        Filters: filters.NewArgs(),  // Инициализируем пустые фильтры
+    })
     if err != nil {
         return nil, err
     }

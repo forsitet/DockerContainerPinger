@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-ping/ping"
+	ping "github.com/prometheus-community/pro-bing"
 )
 
 type Service struct {
