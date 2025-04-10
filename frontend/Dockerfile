@@ -1,20 +1,47 @@
-FROM ubuntu:24.04.2 AS builder
+FROM ubuntu:22.04 AS builder
 
-RUN apt-get update && apt-get install -y curl git unzip xz-utils zip libglu1-mesa openjdk-11-jdk
+# Убираем интерактивные запросы
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.2-stable.tar.xz \
-  && tar xf flutter_linux_3.19.2-stable.tar.xz
+# Установка зависимостей
+RUN apt-get update && \
+    apt-get install -y curl git wget unzip xz-utils zip libglu1-mesa fonts-droid-fallback sudo ca-certificates python3 && \
+    apt-get clean
 
-ENV PATH="/flutter/bin:/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# Создаем непривилегированного пользователя
+RUN useradd -m flutter && echo "flutter ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+# Установка переменных среды
+ENV PUB_HOSTED_URL=https://pub.flutter-io.cn
+ENV FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+ENV PATH="/home/flutter/flutter/bin:/home/flutter/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Клонируем flutter от имени пользователя flutter
+USER flutter
+WORKDIR /home/flutter
+RUN git clone https://github.com/flutter/flutter.git && \
+    flutter/bin/flutter doctor
+
+# Переключаем канал и обновляем
+RUN flutter channel master
+RUN flutter upgrade
+RUN flutter config --enable-web
+
+# Возвращаемся к root, чтобы собрать проект
+USER root
 WORKDIR /app
 COPY . .
 
-RUN flutter pub get
-RUN flutter build web
+RUN git config --global --add safe.directory /home/flutter/flutter
+RUN flutter build web --release
 
-# Этап для nginx
-FROM nginx:stable-alpine
+# Финальный nginx-слой
+FROM nginx:stable-alpine AS base
+
+RUN apk update && apk upgrade --no-cache && rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/build/web /usr/share/nginx/html
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

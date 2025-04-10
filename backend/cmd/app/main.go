@@ -17,6 +17,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 // @title My API
@@ -57,6 +58,13 @@ func main() {
 	})
 
 	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Origin", "Content-Type", "Accept"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	pingHandlers.WithObjectHandlers(r)
 
