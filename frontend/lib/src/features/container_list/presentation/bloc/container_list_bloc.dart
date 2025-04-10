@@ -27,7 +27,7 @@ class ContainerListBloc extends Bloc<ContainerListEvent, ContainerListState> {
   ) async {
     emit(ContainerListLoading());
     try {
-      final containers = await getContainers(limit: event.limit ?? 10);
+      final containers = await getContainers();
       emit(ContainerListLoaded(containers));
     } catch (e) {
       emit(ContainerListError(message: e.toString()));

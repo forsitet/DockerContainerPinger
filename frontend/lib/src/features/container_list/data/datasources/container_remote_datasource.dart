@@ -18,18 +18,18 @@ class ContainerRemoteDataSource {
       final response = await dio
           .get(baseUrl + ApiConstants.pings, queryParameters: {'limit': limit});
       if (response.statusCode == 200) {
-        //log(response.data.toString());
-        //log((response.data as List).isEmpty.toString());
+        log(response.data.toString());
+        log((response.data as List).isEmpty.toString());
         if ((response.data as List).isEmpty) {
           return [];
         }
         final raw = List<Map<String, dynamic>>.from(response.data);
         return raw.map((e) => ContainerModel.fromJson(e)).toList();
       }
-      //log('Error: ${response.statusCode} - ${response.data}');
+      log('Error: ${response.statusCode} - ${response.data}');
       throw Exception('Failed to load containers');
     } catch (e) {
-      //log('Error: $e');
+      log('Error: $e');
       throw Exception('Failed to load containers');
     }
   }
