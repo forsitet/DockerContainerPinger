@@ -1,5 +1,7 @@
-import 'package:exapmle_docker_pinger/src/features/container_list/domain/entities/container_entity.dart';
+import '../entities/container_entity.dart';
 
 abstract class ContainerRepository {
-  Future<List<ContainerEntity>> getContainers();
+  Future<List<ContainerEntity>> getContainers({int limit});
+  Future<ContainerEntity> sendPing(ContainerEntity entity);
+  Future<void> deleteOldContainers();
 }

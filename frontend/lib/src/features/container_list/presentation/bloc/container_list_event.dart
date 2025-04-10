@@ -1,3 +1,33 @@
-abstract class ContainerListEvent {}
+import 'package:equatable/equatable.dart';
+import 'package:exapmle_docker_pinger/src/features/container_list/domain/entities/container_entity.dart';
 
-class LoadContainersEvent extends ContainerListEvent {}
+abstract class ContainerListEvent extends Equatable {
+  const ContainerListEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadContainersEvent extends ContainerListEvent {
+  final int? limit;
+
+  const LoadContainersEvent({this.limit});
+
+  @override
+  List<Object?> get props => [limit];
+}
+
+class SendPingEvent extends ContainerListEvent {
+  final ContainerEntity container;
+  final void Function()? onSuccess;
+  final void Function(String error)? onError;
+
+  const SendPingEvent(this.container, {this.onSuccess, this.onError});
+}
+
+class DeleteOldContainersEvent extends ContainerListEvent {
+  final void Function()? onSuccess;
+  final void Function(String error)? onError;
+
+  const DeleteOldContainersEvent({this.onSuccess, this.onError});
+}
