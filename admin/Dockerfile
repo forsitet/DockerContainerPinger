@@ -11,4 +11,9 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
-CMD [ "./entrypoint.sh" ]
+RUN chmod +x /app/entrypoint.sh && \
+    [ -f /app/entrypoint.sh ] && \
+    head -1 /app/entrypoint.sh | grep -q "^#!" || { echo "No shebang in entrypoint.sh"; exit 1; }
+
+# Правильный формат запуска
+ENTRYPOINT ["/app/entrypoint.sh"]

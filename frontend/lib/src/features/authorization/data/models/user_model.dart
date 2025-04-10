@@ -1,19 +1,19 @@
 import 'package:exapmle_docker_pinger/src/features/authorization/domain/entities/user_entity.dart';
 
-class UserModel {
-  final String token;
-  final String username;
-
-  UserModel({required this.token, required this.username});
+class UserModel extends UserEntity {
+  UserModel({required super.username, super.token});
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      token: json['token'],
       username: json['username'],
+      token: json['token'],
     );
   }
 
-  UserEntity toEntity() {
-    return UserEntity(token: token, username: username);
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'token': token,
+    };
   }
 }

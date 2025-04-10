@@ -1,6 +1,6 @@
 class UserEntity {
-  final String token;
   final String username;
+  final String? token;
 
-  UserEntity({required this.token, required this.username});
+  UserEntity({required this.username, this.token});
 }

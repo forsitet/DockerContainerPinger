@@ -1,4 +1,17 @@
 services:
+
+  frontend:
+    container_name: flutter_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - ping_backend
+      - app_auth
+
+
   app_auth:
     container_name: app_auth
     build:
@@ -21,21 +34,21 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -p 5433"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5433" ]
       interval: 10s
       timeout: 5s
       retries: 3
-  
+
   ping_backend:
     container_name: ping_backend
-    build: 
+    build:
       context: ./backend
     ports:
       - "8080:8080"
     depends_on:
       bd_ping:
         condition: service_healthy
-    
+
   bd_ping:
     container_name: bd_ping
     image: postgres:latest
@@ -45,15 +58,15 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: postgres 
+      POSTGRES_DB: postgres
     volumes:
       - pingdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 30s
       timeout: 5s
       retries: 10
-  
+
   kafka:
     container_name: kafka
     image: confluentinc/cp-kafka:7.8.0
@@ -68,7 +81,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    
+
   zookeeper:
     container_name: zookeeper
     image: confluentinc/cp-zookeeper:7.8.0
@@ -77,7 +90,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    
+
   kafka-ui:
     image: provectuslabs/kafka-ui
     container_name: kafka-ui
