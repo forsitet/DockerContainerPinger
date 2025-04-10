@@ -1,47 +1,53 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:exapmle_docker_pinger/src/core/constants/api_constants.dart';
 import 'package:exapmle_docker_pinger/src/core/constants/network_constants.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../models/user_model.dart';
+import 'package:exapmle_docker_pinger/src/core/router/navigation_manager.dart';
+import 'package:exapmle_docker_pinger/src/features/authorization/domain/repositories/auth_repository.dart';
+
 
 class AuthRepositoryImpl implements AuthRepository {
   final Dio dio;
-  final String apiUrl =
-      '${NetworkConstants.SCHEME}${NetworkConstants.HOST}:${NetworkConstants.PORT}${ApiConstants.login}';
+  final String baseUrl;
 
-  AuthRepositoryImpl() : dio = Dio() {
-    dio.options.baseUrl = apiUrl;
-  }
+  AuthRepositoryImpl({
+    required this.dio,
+    this.baseUrl = "${NetworkConstants.SCHEME}${NetworkConstants.HOST}:${NetworkConstants.AUTH_PORT}",
+  });
 
   @override
-  Future<UserEntity> login(
-      String username, String password, bool isAdmin) async {
-    try {
-      // final response = await dio.post('/login', data: {
-      //   'username': username,
-      //   'password': password,
-      //   'isAdmin': isAdmin,
-      // });
+  Future<void> login(String username, String password) async {
+    final response = await dio.post(
+      '$baseUrl${ApiConstants.login}',
+      data: jsonEncode({
+        'username': username,
+        'password': password,
+      }),
+      options: Options(headers: {'Content-Type': 'application/json'}),
+    );
 
-      if (true) {
-        // if (response.statusCode == 200) {
-        // return UserModel.fromJson(response.data).toEntity();
-        return UserModel(token: 'qdwqdqwdqwd', username: username).toEntity();
-      } else {
-        // throw Exception('Ошибка авторизации: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      throw Exception('Ошибка запроса: ${e.message}');
+    if (response.statusCode == 200) {
+      return;
+    } else if (response.statusCode == 401) {
+      throw Exception('Invalid username or password');
+    } else {
+      throw Exception('Failed to login');
     }
   }
 
   @override
   Future<void> logout() async {
-    try {
-      await dio.post('/logout');
-    } on DioException catch (e) {
-      throw Exception('Ошибка выхода: ${e.message}');
-    }
+    NavigatorManager navigatorManager = NavigatorManager();
+    navigatorManager.navigateToLogin();
+  }
+
+  @override
+  Future<bool> isAuthenticated() async {
+    return true;
+  }
+
+  @override
+  Future<String> getToken() async {
+    return 'session';
   }
 }
