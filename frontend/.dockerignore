@@ -1,0 +1,8 @@
+.dart_tool/
+.idea/
+build/
+.git/
+.gitignore
+*.iml
+*.swp
+*.swo

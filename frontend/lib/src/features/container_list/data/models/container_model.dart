@@ -1,33 +1,32 @@
 import 'package:exapmle_docker_pinger/src/features/container_list/domain/entities/container_entity.dart';
 
-class ContainerModel {
-  final String id;
-  final String ip;
-  final int pingTime;
-  final DateTime lastSuccessfulPing;
-
+class ContainerModel extends ContainerEntity {
   ContainerModel({
-    required this.id,
-    required this.ip,
-    required this.pingTime,
-    required this.lastSuccessfulPing,
+    required super.id,
+    required super.containerName,
+    required super.ipAddress,
+    required super.pingTime,
+    required super.lastSuccess,
   });
-
-  ContainerEntity toEntity() {
-    return ContainerEntity(
-      id: id,
-      ip: ip,
-      pingTime: pingTime,
-      lastSuccessfulPing: lastSuccessfulPing,
-    );
-  }
 
   factory ContainerModel.fromJson(Map<String, dynamic> json) {
     return ContainerModel(
-      id: json['id'],
-      ip: json['ip'],
-      pingTime: json['pingTime'],
-      lastSuccessfulPing: DateTime.parse(json['lastSuccessfulPing']),
+      id: json['id'] ?? 0,
+      containerName: json['container_name'],
+      ipAddress: json['ip_address'],
+      pingTime: (json['ping_time'] as num).toDouble(),
+      lastSuccess: DateTime.parse(json['last_success'].replaceAll('"', '')),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id ?? 0,
+      'container_name': containerName,
+      'ip_address': ipAddress,
+      'ping_time': pingTime,
+      'last_success': lastSuccess.toIso8601String(),
+      // 'last_success': '"${lastSuccess.toIso8601String()}"',
+    };
   }
 }
