@@ -33,7 +33,7 @@ func newPreparedStatements(db *sql.DB) *preparedStatements {
 	var err error
 
 	stmts.getPingResults, err = db.Prepare(`
-		SELECT ip_address, container_name, ping_time, last_success
+		SELECT id, ip_address, container_name, ping_time, last_success
 		FROM pings
 		ORDER BY id DESC LIMIT $1
 	`)
@@ -71,7 +71,7 @@ func (r *PingRepository) Get(limit int) ([]domain.Ping, error) {
 	pings := make([]domain.Ping, 0)
 	for rows.Next() {
 		var p domain.Ping
-		err := rows.Scan(&p.IPAddress, &p.ContainerName, &p.PingTime, &p.LastSuccess)
+		err := rows.Scan(&p.ID, &p.IPAddress, &p.ContainerName, &p.PingTime, &p.LastSuccess)
 		if err != nil {
 			log.Println(op, err)
 			continue
