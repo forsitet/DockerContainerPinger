@@ -7,6 +7,7 @@ toolchain go1.23.8
 require (
 	github.com/IBM/sarama v1.45.1
 	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/cors v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/http-swagger v1.3.4
