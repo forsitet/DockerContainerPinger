@@ -1,6 +1,7 @@
 name: Merge to Main
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["CI Pipeline for Frontend", "CI Pipeline for Backend", "CI Pipeline for Admin"]
     types:

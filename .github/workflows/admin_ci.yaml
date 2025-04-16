@@ -1,6 +1,7 @@
 name: CI Pipeline for Admin
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'admin/**'

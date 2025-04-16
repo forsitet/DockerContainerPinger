@@ -1,6 +1,7 @@
 name: CI Pipeline for Backend
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'backend/**'

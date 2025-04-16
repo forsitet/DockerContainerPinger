@@ -1,6 +1,7 @@
 name: CI Pipeline for Frontend
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'frontend/**'
