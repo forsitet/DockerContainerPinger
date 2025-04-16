@@ -11,3 +11,4 @@ psycopg2-binary==2.9
 sqlparse==0.5.3
 tzdata==2025.2
 uritemplate==4.1.1
+pytest>=7.0.0
