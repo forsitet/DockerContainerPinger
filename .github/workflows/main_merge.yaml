@@ -1,0 +1,28 @@
+name: Merge to Main
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline for Frontend", "CI Pipeline for Backend", "CI Pipeline for Admin"]
+    types:
+      - completed
+
+jobs:
+  merge-to-dev:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Create Pull Request to main
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          title: "Auto Merge from ${{ github.ref }}"
+          body: "This PR was automatically created by GitHub Actions."
+          labels: automated
+
+      - name: Merge Pull Request to main
+        uses: pascalgn/automerge-action@v0.15.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          merge-method: squash
