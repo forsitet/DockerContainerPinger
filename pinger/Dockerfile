@@ -1,9 +1,12 @@
 FROM golang:1.24
 
 WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
-RUN go mod tidy
-ENTRYPOINT [ "/ls" ]
-RUN go build -o pinger ./cmd/main.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o pinger .
 
 CMD ["./pinger"]
