@@ -9,3 +9,9 @@ type Ping struct {
 	PingTime      float64   `json:"ping_time"`
 	LastSuccess   time.Time `json:"last_success"`
 }
+
+type ContainerInfo struct {
+    ID   string
+    Name string
+    IPs  []string
+}
