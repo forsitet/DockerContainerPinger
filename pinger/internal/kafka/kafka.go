@@ -7,12 +7,10 @@ import (
 	"pinger/domain"
 )
 
-// Producer обертка для Kafka продюсера
 type Producer struct {
 	producer sarama.SyncProducer
 }
 
-// New создает новый Kafka продюсер
 func New(brokers []string) (*Producer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
@@ -25,7 +23,6 @@ func New(brokers []string) (*Producer, error) {
 	return &Producer{producer: producer}, nil
 }
 
-// Publish публикует результат пинга в Kafka
 func (p *Producer) Publish(result *domain.PingResult) error {
 	data, err := json.Marshal(result)
 	if err != nil {
@@ -41,7 +38,6 @@ func (p *Producer) Publish(result *domain.PingResult) error {
 	return err
 }
 
-// Close закрывает соединение с Kafka
 func (p *Producer) Close() error {
 	return p.producer.Close()
 }

@@ -11,14 +11,12 @@ import (
 	"pinger/internal/kafka"
 )
 
-// Service сервис для пинга контейнеров
 type Service struct {
 	dockerClient  *docker.Client
 	kafkaProducer *kafka.Producer
 	interval      time.Duration
 }
 
-// New создает новый сервис пинга
 func New(dockerClient *docker.Client, kafkaProducer *kafka.Producer, interval time.Duration) *Service {
 	return &Service{
 		dockerClient:  dockerClient,
@@ -27,7 +25,6 @@ func New(dockerClient *docker.Client, kafkaProducer *kafka.Producer, interval ti
 	}
 }
 
-// Run запускает сервис пинга
 func (s *Service) Run() {
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()

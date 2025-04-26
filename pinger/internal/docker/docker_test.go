@@ -13,7 +13,6 @@ import (
 	"pinger/domain"
 )
 
-// MockDockerInterface мок для Docker API
 type MockDockerInterface struct {
 	mock.Mock
 }
@@ -63,20 +62,16 @@ func TestGetContainerInfos(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Создаем мок
 			mockClient := new(MockDockerInterface)
 			mockClient.On("ContainerList", mock.Anything, mock.Anything).
 				Return(tt.mockContainers, tt.mockError)
 
-			// Создаем наш клиент с моком
 			client := &Client{
 				cli: mockClient,
 			}
 
-			// Вызываем тестируемую функцию
 			result, err := client.GetContainerInfos()
 
-			// Проверки
 			if tt.expectedError != "" {
 				assert.ErrorContains(t, err, tt.expectedError)
 			} else {
@@ -84,7 +79,6 @@ func TestGetContainerInfos(t *testing.T) {
 				assert.Equal(t, tt.expected, result)
 			}
 
-			// Проверяем, что ожидаемые методы были вызваны
 			mockClient.AssertExpectations(t)
 		})
 	}
