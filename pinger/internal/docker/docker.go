@@ -8,12 +8,16 @@ import (
 
 	"pinger/domain"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
 )
+type dockerInterface interface {
+	ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error)
+}
 
 type Client struct {
-	cli *dockerClient.Client
+	cli dockerInterface
 }
 
 func New() (*Client, error) {
