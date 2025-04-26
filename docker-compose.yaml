@@ -1,64 +1,40 @@
 services:
-  app_auth:
-    container_name: app_auth
-    build:
-      context: ./admin
-    ports:
-      - "8095:8095"
-    depends_on:
-      bd_auth:
-        condition: service_healthy
-
-  bd_auth:
-    container_name: bd_auth
-    image: postgres:latest
-    restart: always
-    ports:
-      - "5433:5433"
-    env_file:
-      - .env
-    command: postgres -p 5433
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -p 5433"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-  
-  ping_backend:
-    container_name: ping_backend
-    build: 
-      context: ./backend
-    ports:
-      - "8080:8080"
-    depends_on:
-      bd_ping:
-        condition: service_healthy
-    
-  bd_ping:
-    container_name: bd_ping
-    image: postgres:latest
-    restart: always
-    ports:
-      - "5432:5432"
+  postgres:
+    image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: postgres 
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
     volumes:
-      - pingdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
+      interval: 5s
       timeout: 5s
-      retries: 10
-  
-  kafka:
-    container_name: kafka
-    image: confluentinc/cp-kafka:7.8.0
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
     ports:
-      - "9092:9092"
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.8.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
     depends_on:
       zookeeper:
         condition: service_started
@@ -68,57 +44,71 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    
-  zookeeper:
-    container_name: zookeeper
-    image: confluentinc/cp-zookeeper:7.8.0
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "2181:2181"
-    
-  kafka-ui:
-    image: provectuslabs/kafka-ui
-    container_name: kafka-ui
-    ports:
-      - "8090:8090"
-    restart: always
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
-    links:
-      - kafka
-      - zookeeper
+      - "9092:9092"
 
-  pgadmin4:
-    image: elestio/pgadmin:latest
-    container_name: pgadmin
-    restart: always
-    ports:
-      - "5050:80"
-    volumes:
-      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
-    env_file:
-      - .env
-  
-  pinger:
-    container_name: pinger
-    build: ./pinger
+
+  backend:
+    build: ./backend
     depends_on:
-      backend:
+      postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       kafka:
         condition: service_started
     environment:
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=mypassword
+      - DB_NAME=mydb
       - KAFKA_BROKER=kafka:9092
-      - BACKEND_URL=http://backend:8080
-      - DOCKER_HOST_ID=1
-      - PING_INTERVAL=10s
+      - REDIS_ADDR=redis:6379
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "sleep 2 || exit 1"]
+      interval: 10s
+      retries: 3
+
+
+  pinger:
+    container_name: pinger
+    build: 
+      context: ./pinger
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+    environment:
+      DOCKER_API_VERSION: "1.47"
+      KAFKA_BROKER: kafka:9092
+      PING_INTERVAL: 10s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
+    privileged: true
+      
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_started
+      pinger:
+        condition: service_started
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+    ports:
+      - "3000:3000"
+      
+  nginx:
+    image: nginx:stable-alpine
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+        
 volumes:
   pgdata:
-  pingdata:
