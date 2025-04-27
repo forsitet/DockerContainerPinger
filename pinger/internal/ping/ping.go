@@ -1,100 +1,114 @@
 package ping
 
 import (
+	"context"
 	"log"
 	"sync"
 	"time"
 
-	"github.com/prometheus-community/pro-bing"
-	"pinger/domain"
-	"pinger/internal/docker"
-	"pinger/internal/kafka"
+	probing "github.com/prometheus-community/pro-bing"
+	"pinger/domain/model"
+	"pinger/domain/repository"
 )
 
 type Service struct {
-	dockerClient  *docker.Client
-	kafkaProducer *kafka.Producer
-	interval      time.Duration
+	dockerRepo repository.DockerRepository
+	pingRepo   repository.PingRepository
+	interval   time.Duration
 }
 
-func New(dockerClient *docker.Client, kafkaProducer *kafka.Producer, interval time.Duration) *Service {
+func New(
+	dockerRepo repository.DockerRepository,
+	pingRepo repository.PingRepository,
+	interval time.Duration,
+) *Service {
 	return &Service{
-		dockerClient:  dockerClient,
-		kafkaProducer: kafkaProducer,
-		interval:      interval,
+		dockerRepo: dockerRepo,
+		pingRepo:   pingRepo,
+		interval:   interval,
 	}
 }
 
-func (s *Service) Run() {
+func (s *Service) Run(ctx context.Context) {
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		s.pingAllContainers()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.pingContainers(ctx)
+		}
 	}
 }
 
-func (s *Service) pingAllContainers() {
-	containerInfos, err := s.dockerClient.GetContainerInfos()
+func (s *Service) pingContainers(ctx context.Context) {
+	containers, err := s.dockerRepo.GetContainerInfos(ctx)
 	if err != nil {
-		log.Printf("Ошибка получения информации о контейнерах: %v", err)
+		log.Printf("Error getting containers: %v", err)
 		return
 	}
 
 	var wg sync.WaitGroup
-	resultsChan := make(chan *domain.PingResult, 100)
+	results := make(chan *model.PingResult, len(containers))
 
-	for _, info := range containerInfos {
-		if len(info.IPs) == 0 {
-			continue
-		}
-
-		for _, ip := range info.IPs {
+	for _, container := range containers {
+		for _, ip := range container.IPs {
 			wg.Add(1)
-			go s.pingContainer(ip, info.ID, info.Name, &wg, resultsChan)
+			go s.pingContainer(ctx, &wg, results, container.ID, container.Name, ip)
 		}
 	}
 
 	go func() {
 		wg.Wait()
-		close(resultsChan)
+		close(results)
 	}()
 
-	for result := range resultsChan {
-		if err := s.kafkaProducer.Publish(result); err != nil {
-			log.Printf("Ошибка публикации результата: %v", err)
-		} else {
-			log.Printf("Успешно опубликован результат пинга для %s", result.ContainerName)
+	for result := range results {
+		if err := s.pingRepo.Publish(ctx, result); err != nil {
+			log.Printf("Error publishing ping result: %v", err)
 		}
 	}
 }
 
-func (s *Service) pingContainer(ip, containerID, containerName string, wg *sync.WaitGroup, results chan<- *domain.PingResult) {
+func (s *Service) pingContainer(
+	ctx context.Context,
+	wg *sync.WaitGroup,
+	results chan<- *model.PingResult,
+	containerID string,
+	containerName string,
+	ip string,
+) {
 	defer wg.Done()
 
 	pinger, err := probing.NewPinger(ip)
 	if err != nil {
-		log.Printf("Ошибка создания пингера для %s: %v", ip, err)
+		log.Printf("Error creating pinger for %s: %v", ip, err)
 		return
 	}
 
 	pinger.SetPrivileged(true)
 	pinger.Count = 3
 	pinger.Timeout = 5 * time.Second
+	pinger.OnFinish = func(stats *probing.Statistics) {
+		pingTime := float64(stats.AvgRtt) / float64(time.Millisecond)
 
-	if err := pinger.Run(); err != nil {
-		log.Printf("Ошибка пинга %s: %v", ip, err)
-		return
+		select {
+		case <-ctx.Done():
+			return
+		case results <- &model.PingResult{
+			ContainerID:   containerID,
+			ContainerName: containerName,
+			IPAddress:     ip,
+			PingTime:      pingTime,
+			LastSuccess:   time.Now(),
+		}:
+		}
 	}
 
-	stats := pinger.Statistics()
-	pingTime := float64(stats.AvgRtt) / float64(time.Millisecond)
-
-	results <- &domain.PingResult{
-		ContainerID:   containerID,
-		ContainerName: containerName,
-		IPAddress:     ip,
-		PingTime:      pingTime,
-		LastSuccess:   time.Now(),
+	if err := pinger.Run(); err != nil {
+		log.Printf("Ping error for %s: %v", ip, err)
+		return
 	}
 }

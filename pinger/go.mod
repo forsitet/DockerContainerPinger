@@ -1,12 +1,13 @@
 module pinger
 
-go 1.24
+go 1.23.4
 
 require (
 	github.com/IBM/sarama v1.45.1
 	github.com/docker/docker v28.1.1+incompatible
 	github.com/prometheus-community/pro-bing v0.7.0
 	github.com/stretchr/testify v1.10.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -57,6 +58,5 @@ require (
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
 )

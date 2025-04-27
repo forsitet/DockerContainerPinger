@@ -1,0 +1,4 @@
+kafka:
+  broker: "kafka:9092"
+ping:
+  interval: "10s"
