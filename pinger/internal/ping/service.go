@@ -7,13 +7,11 @@ import (
 	probing "github.com/prometheus-community/pro-bing"
 )
 
-// PingerInterface определяем интерфейс для pinger
 type PingerInterface interface {
 	Run() error
 	OnFinish(func(*probing.Statistics))
 }
 
-// pingerWrapper обертка для *probing.Pinger, которая реализует PingerInterface
 type pingerWrapper struct {
 	*probing.Pinger
 	doneFunc func(*probing.Statistics)
@@ -23,7 +21,6 @@ type pingerWrapper struct {
 func (pw *pingerWrapper) OnFinish(f func(*probing.Statistics)) {
 	pw.doneFunc = f
 	pw.Pinger.OnRecv = func(pkt *probing.Packet) {
-		// Здесь можно обновлять статистику по мере получения пакетов
 	}
 	pw.Pinger.OnFinish = func(stats *probing.Statistics) {
 		if pw.doneFunc != nil {

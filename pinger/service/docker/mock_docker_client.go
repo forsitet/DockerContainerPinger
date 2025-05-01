@@ -1,4 +1,3 @@
-// mock_docker_client_test.go
 package docker
 
 import (

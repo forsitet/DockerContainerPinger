@@ -11,7 +11,6 @@ import (
 	"pinger/domain/model"
 )
 
-// MockPinger реализация мока для PingerInterface
 type MockPinger struct {
 	mock.Mock
 }
@@ -25,7 +24,6 @@ func (m *MockPinger) OnFinish(f func(*probing.Statistics)) {
 	m.Called(f)
 }
 
-// MockDockerRepo мок для Docker репозитория
 type MockDockerRepo struct {
 	mock.Mock
 }
@@ -40,7 +38,6 @@ func (m *MockDockerRepo) Close() error {
 	return args.Error(0)
 }
 
-// MockPingRepo мок для репозитория ping
 type MockPingRepo struct {
 	mock.Mock
 }
