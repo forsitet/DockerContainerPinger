@@ -1,3 +1,4 @@
+// mock_docker_client_test.go
 package docker
 
 import (
@@ -5,17 +6,19 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockDockerClient struct {
-	Containers []types.Container
-	Err        error
+	mock.Mock
 }
 
 func (m *MockDockerClient) ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error) {
-	return m.Containers, m.Err
+	args := m.Called(ctx, options)
+	return args.Get(0).([]types.Container), args.Error(1)
 }
 
 func (m *MockDockerClient) Close() error {
-	return nil
+	args := m.Called()
+	return args.Error(0)
 }

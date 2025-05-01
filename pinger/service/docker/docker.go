@@ -17,6 +17,7 @@ type dockerRepository struct {
 	client service.DockerClient
 }
 
+// New создает новый репозиторий с клиентом по умолчанию
 func New() (repository.DockerRepository, error) {
 	cli, err := dockerClient.NewClientWithOpts(
 		dockerClient.FromEnv,
@@ -26,9 +27,13 @@ func New() (repository.DockerRepository, error) {
 		return nil, err
 	}
 
+	return NewWithClient(cli), nil
+}
+
+func NewWithClient(client service.DockerClient) repository.DockerRepository {
 	return &dockerRepository{
-		client: cli,
-	}, nil
+		client: client,
+	}
 }
 
 func (r *dockerRepository) GetContainerInfos(ctx context.Context) (map[string]model.ContainerInfo, error) {
