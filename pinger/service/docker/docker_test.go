@@ -14,7 +14,6 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("successful creation", func(t *testing.T) {
-		// Используем реальный клиент в этом тесте
 		repo, err := New()
 		if err != nil {
 			t.Skip("Docker not available, skipping test")
@@ -24,11 +23,9 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("creation error", func(t *testing.T) {
-		// Создаем мок клиента, который возвращает ошибку
 		mockClient := &MockDockerClient{}
 		mockClient.On("Close").Return(nil)
 
-		// Используем NewWithClient для инъекции мока
 		repo := NewWithClient(mockClient)
 		assert.NotNil(t, repo)
 	})
@@ -174,7 +171,6 @@ func TestConvertToContainerInfo(t *testing.T) {
 			result := convertToContainerInfo(tt.container)
 			assert.Equal(t, tt.expected, result, "Test case: %s", tt.name)
 			
-			// Дополнительные проверки
 			if len(tt.expected.IPs) > 0 {
 				assert.Equal(t, len(tt.expected.IPs), len(result.IPs))
 				for i, ip := range tt.expected.IPs {

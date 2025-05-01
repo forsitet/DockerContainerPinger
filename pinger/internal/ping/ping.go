@@ -64,16 +64,13 @@ func (s *Service) pingContainer(
 ) {
 	defer wg.Done()
 
-	pinger, err := probing.NewPinger(ip)
+	pinger, err := s.newPinger(ip)
 	if err != nil {
 		log.Printf("Error creating pinger for %s: %v", ip, err)
 		return
 	}
 
-	pinger.SetPrivileged(true)
-	pinger.Count = 3
-	pinger.Timeout = 5 * time.Second
-	pinger.OnFinish = func(stats *probing.Statistics) {
+	pinger.OnFinish(func(stats *probing.Statistics) {
 		pingTime := float64(stats.AvgRtt) / float64(time.Millisecond)
 
 		select {
@@ -87,7 +84,7 @@ func (s *Service) pingContainer(
 			LastSuccess:   time.Now(),
 		}:
 		}
-	}
+	})
 
 	if err := pinger.Run(); err != nil {
 		log.Printf("Ping error for %s: %v", ip, err)

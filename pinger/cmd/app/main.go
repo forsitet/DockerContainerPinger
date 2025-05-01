@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("Kafka initialization error: %v", err)
 	}
 
-	pingService := ping.New(
+	pingService := ping.NewService(
 		dockerRepo,
 		kafkaRepo,
 		cfg.GetPingInterval(),
