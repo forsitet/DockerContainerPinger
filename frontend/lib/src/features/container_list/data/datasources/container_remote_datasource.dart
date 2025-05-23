@@ -52,11 +52,13 @@ class ContainerRemoteDataSource {
     }
   }
 
-  Future<void> deleteOldContainers() async {
+  Future<void> deleteOldContainers(DateTime before) async {
     final url = baseUrl + ApiConstants.pingsOld;
-    // //log('Deleting old containers at $url');
-    final response = await dio.delete(url);
-    if (response.statusCode != 204) {
+    log('Deleting containers older than $before');
+    final response = await dio.delete(url, queryParameters: {
+      'before': before.toUtc().toIso8601String(),
+    });
+    if (response.statusCode != 200) {
       throw Exception('Failed to delete old containers');
     }
   }

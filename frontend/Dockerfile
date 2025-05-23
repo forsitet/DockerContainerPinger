@@ -17,7 +17,7 @@ WORKDIR /home/flutter
 RUN git clone https://github.com/flutter/flutter.git && \
     flutter/bin/flutter doctor
 
-RUN flutter channel stable
+RUN flutter channel master
 RUN flutter upgrade
 RUN flutter config --enable-web
 
@@ -33,7 +33,6 @@ COPY . .
 RUN git config --global --add safe.directory /home/flutter/flutter
 RUN flutter build web --release
 
-# Финальный nginx-слой
 FROM nginx:stable-alpine AS base
 
 RUN apk update && apk upgrade --no-cache && rm /etc/nginx/conf.d/default.conf

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:exapmle_docker_pinger/generated/app_localizations.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/theme/theme_bloc.dart';
 import 'package:exapmle_docker_pinger/src/core/router/navigation_manager.dart';
 import 'package:exapmle_docker_pinger/src/core/styles/theme/themes.dart';
-import 'package:exapmle_docker_pinger/generated/l10n.dart';
 import 'package:exapmle_docker_pinger/src/features/authorization/data/repositories/auth_repository_impl.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/auth/auth_bloc.dart';
 import 'package:exapmle_docker_pinger/src/features/container_list/data/datasources/container_remote_datasource.dart';
@@ -13,7 +13,6 @@ import 'package:exapmle_docker_pinger/src/features/container_list/domain/usecase
 import 'package:exapmle_docker_pinger/src/features/container_list/presentation/bloc/container_list_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,14 +54,10 @@ class App extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeState.themeMode,
-          localizationsDelegates: [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           debugShowCheckedModeBanner: false,
+          // title: S.of(context).appName,
           title: 'Docker Manager',
           routerConfig: _mainNavigation.router,
           // home: BlocProvider(

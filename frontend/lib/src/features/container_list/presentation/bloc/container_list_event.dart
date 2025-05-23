@@ -26,8 +26,10 @@ class SendPingEvent extends ContainerListEvent {
 }
 
 class DeleteOldContainersEvent extends ContainerListEvent {
+  final DateTime before;
   final void Function()? onSuccess;
   final void Function(String error)? onError;
 
-  const DeleteOldContainersEvent({this.onSuccess, this.onError});
+  const DeleteOldContainersEvent(
+      {required this.before, this.onSuccess, this.onError});
 }

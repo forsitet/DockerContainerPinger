@@ -6,7 +6,7 @@ class BaseButton extends StatelessWidget {
 
   const BaseButton({super.key, required this.text, required this.onPressed});
 
-  @override //TODO make stylization in theme
+  @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,

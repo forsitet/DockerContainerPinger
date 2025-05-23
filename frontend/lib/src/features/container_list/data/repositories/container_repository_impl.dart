@@ -1,5 +1,3 @@
-
-
 import 'package:exapmle_docker_pinger/src/features/container_list/data/datasources/container_remote_datasource.dart';
 import 'package:exapmle_docker_pinger/src/features/container_list/data/models/container_model.dart';
 import 'package:exapmle_docker_pinger/src/features/container_list/domain/entities/container_entity.dart';
@@ -18,7 +16,7 @@ class ContainerRepositoryImpl implements ContainerRepository {
   @override
   Future<ContainerEntity> sendPing(ContainerEntity entity) {
     return remote.sendPing(ContainerModel(
-      id: entity.id,
+      id: entity.id ?? 0,
       containerName: entity.containerName,
       ipAddress: entity.ipAddress,
       pingTime: entity.pingTime,
@@ -27,7 +25,7 @@ class ContainerRepositoryImpl implements ContainerRepository {
   }
 
   @override
-  Future<void> deleteOldContainers() {
-    return remote.deleteOldContainers();
+  Future<void> deleteOldContainers(DateTime before) {
+    return remote.deleteOldContainers(before);
   }
 }

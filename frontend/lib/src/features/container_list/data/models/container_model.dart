@@ -1,32 +1,47 @@
+// ignore_for_file: overridden_fields
+
+import 'package:equatable/equatable.dart';
 import 'package:exapmle_docker_pinger/src/features/container_list/domain/entities/container_entity.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-class ContainerModel extends ContainerEntity {
+part 'container_model.g.dart';
+
+@JsonSerializable()
+class ContainerModel extends ContainerEntity with EquatableMixin {
+  @JsonKey(name: 'container_name')
+  @override
+  final String containerName;
+
+  @JsonKey(name: 'ip_address')
+  @override
+  final String ipAddress;
+
+  @JsonKey(name: 'ping_time')
+  @override
+  final double pingTime;
+
+  @JsonKey(name: 'last_success')
+  @override
+  final DateTime lastSuccess;
+
   ContainerModel({
-    required super.id,
-    required super.containerName,
-    required super.ipAddress,
-    required super.pingTime,
-    required super.lastSuccess,
-  });
+    super.id,
+    required this.containerName,
+    required this.ipAddress,
+    required this.pingTime,
+    required this.lastSuccess,
+  }) : super(
+            containerName: containerName,
+            ipAddress: ipAddress,
+            pingTime: pingTime,
+            lastSuccess: lastSuccess);
 
-  factory ContainerModel.fromJson(Map<String, dynamic> json) {
-    return ContainerModel(
-      id: json['id'] ?? 0,
-      containerName: json['container_name'],
-      ipAddress: json['ip_address'],
-      pingTime: (json['ping_time'] as num).toDouble(),
-      lastSuccess: DateTime.parse(json['last_success'].replaceAll('"', '')),
-    );
-  }
+  factory ContainerModel.fromJson(Map<String, dynamic> json) =>
+      _$ContainerModelFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id ?? 0,
-      'container_name': containerName,
-      'ip_address': ipAddress,
-      'ping_time': pingTime,
-      'last_success': lastSuccess.toIso8601String(),
-      // 'last_success': '"${lastSuccess.toIso8601String()}"',
-    };
-  }
+  Map<String, dynamic> toJson() => _$ContainerModelToJson(this);
+
+  @override
+  List<Object?> get props =>
+      [id, containerName, ipAddress, pingTime, lastSuccess];
 }

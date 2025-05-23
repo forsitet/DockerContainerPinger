@@ -4,7 +4,7 @@ class ContainerEntity {
   final String ipAddress;
   final double pingTime;
   final DateTime lastSuccess;
-  
+
   ContainerEntity({
     required this.id,
     required this.containerName,
@@ -14,18 +14,18 @@ class ContainerEntity {
   });
 
   ContainerEntity copyWith({
-  int? id,
-  String? containerName,
-  String? ipAddress,
-  double? pingTime,
-  DateTime? lastSuccess,
-}) {
-  return ContainerEntity(
-    id: id ?? this.id,
-    containerName: containerName ?? this.containerName,
-    ipAddress: ipAddress ?? this.ipAddress,
-    pingTime: pingTime ?? this.pingTime,
-    lastSuccess: lastSuccess ?? this.lastSuccess,
-  );
-}
+    int? id,
+    String? containerName,
+    String? ipAddress,
+    double? pingTime,
+    DateTime? lastSuccess,
+  }) {
+    return ContainerEntity(
+      id: id ?? this.id,
+      containerName: containerName ?? this.containerName,
+      ipAddress: ipAddress ?? this.ipAddress,
+      pingTime: pingTime ?? this.pingTime,
+      lastSuccess: lastSuccess ?? this.lastSuccess,
+    );
+  }
 }

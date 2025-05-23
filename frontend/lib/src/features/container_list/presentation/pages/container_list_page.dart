@@ -1,3 +1,4 @@
+import 'package:exapmle_docker_pinger/generated/app_localizations.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/auth/auth_bloc.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/auth/auth_event.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/theme/theme_bloc.dart';
@@ -39,32 +40,113 @@ class ContainerListPage extends StatelessWidget {
             icon: Icon(Icons.delete_sweep_rounded),
             color: Colors.redAccent,
             onPressed: () async {
-              try {
-                final bloc = context.read<ContainerListBloc>();
-                await Future.microtask(() {
-                  bloc.add(DeleteOldContainersEvent(
-                    onError: (String errorMessage) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Не удалось удалить устаревшие контйнеры.')),
+              DateTime selectedDate =
+                  DateTime.now().subtract(Duration(days: 30));
+              await showDialog(
+                context: context,
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return AlertDialog(
+                        title: Text(
+                            AppLocalizations.of(context).deleting_containers),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(AppLocalizations.of(context)
+                                .choose_date_to_delete),
+                            SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Дата: ${selectedDate.toLocal().toString().split(' ')[0]}',
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.calendar_today),
+                                  onPressed: () async {
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: selectedDate,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime.now(),
+                                    );
+                                    if (picked != null) {
+                                      setState(() {
+                                        selectedDate = picked;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(AppLocalizations.of(context).cancel),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                final bloc = context.read<ContainerListBloc>();
+                                await Future.microtask(() {
+                                  bloc.add(DeleteOldContainersEvent(
+                                    before: selectedDate,
+                                    onError: (String errorMessage) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            backgroundColor:
+                                                AppColors.errorColor,
+                                            content: Text(AppLocalizations.of(
+                                                    context)
+                                                .deleting_containers_error)),
+                                      );
+                                    },
+                                    onSuccess: () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            backgroundColor:
+                                                AppColors.successColor,
+                                            content: Text(AppLocalizations.of(
+                                                    context)
+                                                .deleting_containers_success)),
+                                      );
+                                      context
+                                          .read<ContainerListBloc>()
+                                          .add(LoadContainersEvent());
+                                    },
+                                  ));
+                                });
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              } catch (_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            AppLocalizations.of(context)
+                                                .deleting_containers_error)),
+                                  );
+                                }
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              }
+                            },
+                            child: Text(AppLocalizations.of(context).delete),
+                          ),
+                        ],
                       );
                     },
-                    onSuccess: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Успешное удаление!')),
-                      );
-                      context
-                          .read<ContainerListBloc>()
-                          .add(LoadContainersEvent());
-                    },
-                  ));
-                });
-              } catch (_) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Не удалось удалить устаревшие контйнеры.')),
-                );
-              }
+                  );
+                },
+              );
             },
           ),
           SizedBox(width: 40),
@@ -91,11 +173,14 @@ class ContainerListPage extends StatelessWidget {
           } else if (state is ContainerListLoaded) {
             return (state.containers.isNotEmpty)
                 ? AdaptiveContainerList(containers: state.containers)
-                : Center(child: Text('Нет контейнеров для отображения'));
+                : Center(
+                    child: Text(AppLocalizations.of(context).empty_containers));
           } else if (state is ContainerListError) {
-            return Center(child: Text('Ошибка: ${state.message}'));
+            return Center(
+                child: Text(
+                    '${AppLocalizations.of(context).get_containers_error}: ${state.message}'));
           }
-          return Center(child: Text('Загрузка...'));
+          return Center(child: Text(AppLocalizations.of(context).loading));
         },
       ),
     );
@@ -155,7 +240,7 @@ class _AdaptiveContainerListState extends State<AdaptiveContainerList> {
                               onPressed: () {
                                 _showPingDialog(context, container);
                               },
-                              child: Text('Ping'),
+                              child: Text(AppLocalizations.of(context).edit),
                             ),
                           ),
                         ]);
@@ -252,7 +337,7 @@ class _AdaptiveContainerListState extends State<AdaptiveContainerList> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Редактировать контейнер'),
+              title: Text(AppLocalizations.of(context).edit_container),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -300,7 +385,7 @@ class _AdaptiveContainerListState extends State<AdaptiveContainerList> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                                  'Некорректные данные. Проверьте все поля.')),
+                                  AppLocalizations.of(context).invalid_data)),
                         );
                         return;
                       }
@@ -326,7 +411,9 @@ class _AdaptiveContainerListState extends State<AdaptiveContainerList> {
                           onSuccess: () {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Успешное сохранение!')),
+                              SnackBar(
+                                  content: Text(AppLocalizations.of(context)
+                                      .success_save)),
                             );
                             context
                                 .read<ContainerListBloc>()
@@ -335,13 +422,18 @@ class _AdaptiveContainerListState extends State<AdaptiveContainerList> {
                         ));
                       });
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Произошла ошибка: $e')),
-                      );
-                      Navigator.of(context).pop();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Произошла ошибка: $e'),
+                            backgroundColor: AppColors.errorColor,
+                          ),
+                        );
+                      }
+                      if (context.mounted) Navigator.of(context).pop();
                     }
                   },
-                  child: Text('Сохранить'),
+                  child: Text(AppLocalizations.of(context).save),
                 ),
               ],
             );
