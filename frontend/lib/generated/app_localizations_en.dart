@@ -21,7 +21,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_success => 'You have successfully signed in!';
 
   @override
-  String get auth_failure => 'Ошибка авторизации. Пожалуйста, проверьте свои учетные данные.';
+  String get auth_failure =>
+      'Ошибка авторизации. Пожалуйста, проверьте свои учетные данные.';
 
   @override
   String get success_save => 'Успешное сохранение!';
@@ -36,16 +37,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get get_containers_error => 'Ошибка получения контейнеров';
 
   @override
-  String get deleting_containers_error => 'Ошибка удаления устаревших контейнеров';
+  String get deleting_containers_error =>
+      'Ошибка удаления устаревших контейнеров';
 
   @override
-  String get deleting_containers_success => 'Устаревшие контейнеры успешно удалены';
+  String get deleting_containers_success =>
+      'Устаревшие контейнеры успешно удалены';
 
   @override
   String get deleting_containers => 'Удаление устаревших контейнеров';
 
   @override
-  String get choose_date_to_delete => 'Выберите дату. Все контейнеры, последний пинг которых был до этой даты, будут удалены.';
+  String get choose_date_to_delete =>
+      'Выберите дату. Все контейнеры, последний пинг которых был до этой даты, будут удалены.';
 
   @override
   String get empty_containers => 'Нет доступных контейнеров.';
