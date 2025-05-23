@@ -27,15 +27,10 @@ type KafkaConfig struct {
 	Broker string `yaml:"broker"`
 }
 
-type Redis struct {
-	Port uint16 `yaml:"port"`
-}
-
 type AppConfig struct {
 	BD    BDConfig    `yaml:"bd"`
 	HTTP  HTTPConfig  `yaml:"http"`
 	Kafka KafkaConfig `yaml:"kafka"`
-	Redis Redis       `yaml:"redis"`
 }
 
 func ParseFlags() AppFlags {
