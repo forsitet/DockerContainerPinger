@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:exapmle_docker_pinger/src/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 

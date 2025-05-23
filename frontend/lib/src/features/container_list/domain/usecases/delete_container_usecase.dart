@@ -5,7 +5,7 @@ class DeleteContainersUseCase {
 
   DeleteContainersUseCase(this.repository);
 
-  Future<void> call() {
-    return repository.deleteOldContainers();
+  Future<void> call(DateTime before) {
+    return repository.deleteOldContainers(before);
   }
 }

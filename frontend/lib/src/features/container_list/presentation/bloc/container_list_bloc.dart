@@ -67,7 +67,7 @@ class ContainerListBloc extends Bloc<ContainerListEvent, ContainerListState> {
   ) async {
     if (state is ContainerListLoaded) {
       try {
-        await deleteOld();
+        await deleteOld(event.before);
         add(LoadContainersEvent());
         event.onSuccess?.call();
       } catch (e) {
