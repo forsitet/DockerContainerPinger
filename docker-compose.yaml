@@ -10,6 +10,7 @@ services:
     depends_on:
       - ping_backend
       - app_auth
+      - pinger
 
 
   app_auth:
@@ -48,6 +49,17 @@ services:
     depends_on:
       bd_ping:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
+  pinger:
+    container_name: pinger
+    build: 
+      context: ./pinger
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   bd_ping:
     container_name: bd_ping
@@ -59,11 +71,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: postgres
-    volumes:
-      - pingdata:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 30s
+      interval: 10s
       timeout: 5s
       retries: 10
 
@@ -81,6 +91,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   zookeeper:
     container_name: zookeeper
@@ -118,4 +134,3 @@ services:
 
 volumes:
   pgdata:
-  pingdata:
