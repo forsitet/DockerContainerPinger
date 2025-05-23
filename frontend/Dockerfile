@@ -23,6 +23,11 @@ RUN flutter config --enable-web
 
 USER root
 WORKDIR /app
+
+
+COPY pubspec.yaml pubspec.lock ./
+RUN flutter pub get
+
 COPY . .
 
 RUN git config --global --add safe.directory /home/flutter/flutter

@@ -113,7 +113,7 @@ const docTemplate = `{
                 "summary": "Delete containers from the database after the 'before' date",
                 "responses": {
                     "204": {
-                        "description": "Удалено"
+                        "description": "Удалены устаревшие контейнеры"
                     },
                     "400": {
                         "description": "Bad Request",

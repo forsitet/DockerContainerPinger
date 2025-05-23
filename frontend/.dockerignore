@@ -1,8 +1,5 @@
-.dart_tool/
-.idea/
-build/
-.git/
-.gitignore
+.git
+build
+.idea
 *.iml
-*.swp
-*.swo
+*.lock
