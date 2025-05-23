@@ -1,1 +1,7 @@
-{}
+{
+    "auth_title": "Authorization",
+    "sign_in": "Sign In",
+    "sign_out": "Sign Out",
+    "auth_success": "You have successfully signed in!",
+    "appName": "Docker Container Pinger"
+}

@@ -1,3 +1,4 @@
+import 'package:exapmle_docker_pinger/generated/app_localizations.dart';
 import 'package:exapmle_docker_pinger/src/core/router/app_router.dart';
 import 'package:exapmle_docker_pinger/src/core/styles/app_colors.dart';
 import 'package:exapmle_docker_pinger/src/core/presentation/bloc/auth/auth_event.dart';
@@ -60,12 +61,18 @@ class _LoginPageState extends State<LoginPage> {
                     listener: (context, state) {
                       if (state is AuthAuthenticated) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Успешный вход!')),
+                          SnackBar(
+                              backgroundColor: AppColors.successColor,
+                              content: Text(
+                                  AppLocalizations.of(context).auth_success)),
                         );
                         context.go(AppRouteNames.containers);
                       } else if (state is AuthError) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Направильный логин или пароль')),
+                          SnackBar(
+                              backgroundColor: AppColors.errorColor,
+                              content: Text(
+                                  AppLocalizations.of(context).auth_failure)),
                         );
                       }
                     },
@@ -87,17 +94,16 @@ class _LoginPageState extends State<LoginPage> {
                               // context.goNamed(AppRouteNames.containers);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 26, 49, 27),
+                              backgroundColor: AppColors.primaryColor,
                               padding: EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               textStyle: TextStyle(fontSize: 18),
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.getTextColor(context),
                             ),
-                            child:
-                                Text('Войти', style: TextStyle(fontSize: 18))),
+                            child: Text(AppLocalizations.of(context).sign_in,
+                                style: TextStyle(fontSize: 18))),
                       );
                     },
                   ),
@@ -130,7 +136,7 @@ class AuthTitleAndInput extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Авторизация',
+          AppLocalizations.of(context).auth_title,
           style: TextStyle(fontSize: 24),
         ),
         SizedBox(height: 24),
