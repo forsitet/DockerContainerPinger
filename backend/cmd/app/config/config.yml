@@ -7,5 +7,3 @@ http:
   address: ":8080"
 kafka:
   broker: "kafka:9092"
-redis:
-  port:
