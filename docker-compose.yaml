@@ -87,7 +87,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     healthcheck:
       test: nc -z localhost 9092 || exit -1
-      start_period: 15s
+      start_period: 5s
       interval: 5s
       timeout: 10s
       retries: 10
