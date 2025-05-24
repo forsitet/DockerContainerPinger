@@ -111,9 +111,19 @@ const docTemplate = `{
                     "Ping"
                 ],
                 "summary": "Delete containers from the database after the 'before' date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "'before' must be in the format RFC3339",
+                        "name": "before",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "204": {
-                        "description": "Удалены устаревшие контейнеры"
+                        "description": "Удалено"
                     },
                     "400": {
                         "description": "Bad Request",

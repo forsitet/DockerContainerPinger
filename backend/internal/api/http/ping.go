@@ -100,7 +100,7 @@ func (h *PingHandler) PostPing(w http.ResponseWriter, r *http.Request) {
 // @Summary      Delete containers from the database after the 'before' date
 // @Description  Deletes outdated containers
 // @Tags         Ping
-// @Param        before  path  time.Time  true  "'before' must be in the format RFC3339"
+// @Param        before  path  string  true  "'before' must be in the format RFC3339" Format(date-time)
 // @Success      204  "Удалено"
 // @Failure      400  {object}  types.ErrorResponse
 // @Failure      500  {object}  types.ErrorResponse

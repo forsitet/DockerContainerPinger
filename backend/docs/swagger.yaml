@@ -89,6 +89,13 @@ paths:
   /api/pings/old:
     delete:
       description: Deletes outdated containers
+      parameters:
+      - description: '''before'' must be in the format RFC3339'
+        format: date-time
+        in: path
+        name: before
+        required: true
+        type: string
       responses:
         "204":
           description: Удалено
