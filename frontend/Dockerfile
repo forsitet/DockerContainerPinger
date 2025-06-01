@@ -2,36 +2,28 @@ FROM ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
-    apt-get install -y curl git wget unzip xz-utils zip libglu1-mesa fonts-droid-fallback sudo ca-certificates python3 && \
-    apt-get clean
+RUN apt-get update 
+RUN apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa fonts-droid-fallback python3
+RUN apt-get clean
 
-RUN useradd -m flutter && echo "flutter ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
+ENV DEBIAN_FRONTEND=dialog
 ENV PUB_HOSTED_URL=https://pub.flutter-io.cn
 ENV FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
-ENV PATH="/home/flutter/flutter/bin:/home/flutter/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
-USER flutter
-WORKDIR /home/flutter
-RUN git clone https://github.com/flutter/flutter.git && \
-    flutter/bin/flutter doctor
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+RUN flutter doctor
 
 RUN flutter channel master
 RUN flutter upgrade
 RUN flutter config --enable-web
 
-USER root
-WORKDIR /app
-
-
-COPY pubspec.yaml pubspec.lock ./
-RUN flutter pub get
-
-COPY . .
-
-RUN git config --global --add safe.directory /home/flutter/flutter
-RUN flutter build web --release
+RUN mkdir /app/
+COPY . /app/
+WORKDIR /app/
+RUN flutter build web
 
 FROM nginx:stable-alpine AS base
 
