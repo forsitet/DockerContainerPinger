@@ -29,8 +29,8 @@ FROM nginx:stable-alpine AS base
 
 RUN apk update && apk upgrade --no-cache && rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/build/web /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY --from=builder /app/build/web /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
