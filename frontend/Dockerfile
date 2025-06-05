@@ -21,15 +21,17 @@ RUN flutter upgrade
 RUN flutter config --enable-web
 
 RUN mkdir /app/
-COPY . /app/
-WORKDIR /app/
+
+WORKDIR /app
+COPY frontend/ /app/
+
 RUN flutter build web
 
 FROM nginx:stable-alpine AS base
 
 RUN apk update && apk upgrade --no-cache && rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ../nginx/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/build/web /usr/share/nginx/html
 
 EXPOSE 80
