@@ -21,6 +21,7 @@ RUN flutter upgrade
 RUN flutter config --enable-web
 
 RUN mkdir /app/
+
 WORKDIR /app
 COPY frontend/ /app/
 
